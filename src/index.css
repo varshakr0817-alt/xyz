@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-navy-950: #000f3f;
+  --color-navy-900: #172554;
+  --color-royal-600: #2563eb;
+  --color-royal-700: #1d4ed8;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
+  --color-canvas: #f8f9ff;
+  --color-surface: #ffffff;
+  --color-ink: #0b1c30;
+  --color-ink-muted: #45464f;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #f8f9ff;
+    color: #0b1c30;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.shadow-level-1 {
+  box-shadow: 0 1px 3px 0 rgba(23, 37, 84, 0.05), 0 1px 2px -1px rgba(23, 37, 84, 0.05);
+}
+
+.shadow-level-2 {
+  box-shadow: 0 10px 15px -3px rgba(23, 37, 84, 0.08), 0 4px 6px -4px rgba(23, 37, 84, 0.04);
+}
+
+.shadow-level-3 {
+  box-shadow: 0 20px 25px -5px rgba(23, 37, 84, 0.1), 0 8px 10px -6px rgba(23, 37, 84, 0.06);
+}
+
+.shadow-level-4 {
+  box-shadow: 0 25px 50px -12px rgba(23, 37, 84, 0.25);
+}

@@ -1,0 +1,6 @@
+{
+  "name": "PlacementPrep",
+  "description": "Campus recruitment preparation workspace for coding practice, timed assessments, and technical interview readiness.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

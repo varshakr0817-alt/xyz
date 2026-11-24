@@ -1,0 +1,928 @@
+import {
+  Assessment,
+  CodeLanguage,
+  Difficulty,
+  InterviewDrive,
+  InterviewStage,
+  MockInterviewPrompt,
+  Question,
+  TopicCategory,
+  WeeklyActivityPoint,
+} from '../types/placement';
+
+export const QUESTIONS: Question[] = [
+  {
+    id: 'q-two-sum',
+    number: 1,
+    title: 'Two Sum Indices',
+    topic: TopicCategory.ArraysHashing,
+    difficulty: Difficulty.Easy,
+    companies: ['Google', 'Amazon', 'Microsoft'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 15,
+    prompt:
+      'Given an array of integers nums and an integer target, return the indices of the two numbers such that they add up to target. You may assume that each input has exactly one solution, and you may not use the same element twice.',
+    examples: [
+      {
+        input: 'nums = [2, 7, 11, 15], target = 9',
+        output: '[0, 1]',
+        explanation: 'nums[0] + nums[1] == 9, so return [0, 1].',
+      },
+      {
+        input: 'nums = [3, 2, 4], target = 6',
+        output: '[1, 2]',
+      },
+    ],
+    constraints: [
+      '2 <= nums.length <= 10^4',
+      '-10^9 <= nums[i] <= 10^9',
+      'Only one valid answer exists.',
+    ],
+    hints: [
+      'A brute force nested loop checks every pair in O(n^2). Can you store previously seen values for O(1) lookup?',
+      'Use a hash map storing value -> index as you iterate once through nums.',
+    ],
+    approachSummary:
+      'Maintain a single-pass hash map mapping each visited number to its index. For each element x, check whether (target - x) already exists in the map before inserting x.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(n)',
+    functionName: 'twoSum',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function twoSum(nums, target) {\n  // Return [i, j] where nums[i] + nums[j] === target\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (seen.has(complement)) {\n      return [seen.get(complement), i];\n    }\n    seen.set(nums[i], i);\n  }\n  return [];\n}`,
+      [CodeLanguage.Python]: `def two_sum(nums: list[int], target: int) -> list[int]:\n    seen = {}\n    for i, num in enumerate(nums):\n        comp = target - num\n        if comp in seen:\n            return [seen[comp], i]\n        seen[num] = i\n    return []`,
+      [CodeLanguage.Cpp]: `vector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> seen;\n    for (int i = 0; i < nums.size(); ++i) {\n        int comp = target - nums[i];\n        if (seen.count(comp)) return {seen[comp], i};\n        seen[nums[i]] = i;\n    }\n    return {};\n}`,
+    },
+    referenceSolutionJs: `function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const comp = target - nums[i];\n    if (seen.has(comp)) return [seen.get(comp), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'nums = [2, 7, 11, 15], target = 9', args: [[2, 7, 11, 15], 9], expected: [0, 1] },
+      { id: 'tc2', inputDisplay: 'nums = [3, 2, 4], target = 6', args: [[3, 2, 4], 6], expected: [1, 2] },
+      { id: 'tc3', inputDisplay: 'nums = [3, 3], target = 6', args: [[3, 3], 6], expected: [0, 1] },
+    ],
+  },
+  {
+    id: 'q-valid-anagram-groups',
+    number: 2,
+    title: 'Longest Substring Without Repeating Characters',
+    topic: TopicCategory.SlidingWindow,
+    difficulty: Difficulty.Medium,
+    companies: ['Amazon', 'Microsoft', 'Stripe'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 25,
+    prompt:
+      'Given a string s, find the length of the longest substring without duplicate characters.',
+    examples: [
+      {
+        input: 's = "abcabcbb"',
+        output: '3',
+        explanation: 'The answer is "abc", with the length of 3.',
+      },
+      {
+        input: 's = "bbbbb"',
+        output: '1',
+      },
+    ],
+    constraints: ['0 <= s.length <= 5 * 10^4', 's consists of English letters, digits, symbols and spaces.'],
+    hints: [
+      'Maintain a sliding window [left, right] with no repeating characters.',
+      'Track the last seen index of each character to jump left forward in O(1).',
+    ],
+    approachSummary:
+      'Use a sliding window and a character-to-index map. When a repeated character enters inside the current window, advance left to lastSeen + 1 and update the maximum window width.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(min(n, charset))',
+    functionName: 'lengthOfLongestSubstring',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function lengthOfLongestSubstring(s) {\n  // Write your sliding window solution\n  const lastIndex = new Map();\n  let left = 0;\n  let best = 0;\n  for (let right = 0; right < s.length; right++) {\n    const ch = s[right];\n    if (lastIndex.has(ch) && lastIndex.get(ch) >= left) {\n      left = lastIndex.get(ch) + 1;\n    }\n    lastIndex.set(ch, right);\n    best = Math.max(best, right - left + 1);\n  }\n  return best;\n}`,
+      [CodeLanguage.Python]: `def length_of_longest_substring(s: str) -> int:\n    last_seen = {}\n    left = best = 0\n    for right, ch in enumerate(s):\n        if ch in last_seen and last_seen[ch] >= left:\n            left = last_seen[ch] + 1\n        last_seen[ch] = right\n        best = max(best, right - left + 1)\n    return best`,
+      [CodeLanguage.Cpp]: `int lengthOfLongestSubstring(string s) {\n    vector<int> last(256, -1);\n    int left = 0, best = 0;\n    for (int r = 0; r < s.size(); ++r) {\n        if (last[s[r]] >= left) left = last[s[r]] + 1;\n        last[s[r]] = r;\n        best = max(best, r - left + 1);\n    }\n    return best;\n}`,
+    },
+    referenceSolutionJs: `function lengthOfLongestSubstring(s) {\n  const last = new Map();\n  let left = 0, best = 0;\n  for (let r = 0; r < s.length; r++) {\n    if (last.has(s[r]) && last.get(s[r]) >= left) left = last.get(s[r]) + 1;\n    last.set(s[r], r);\n    best = Math.max(best, r - left + 1);\n  }\n  return best;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 's = "abcabcbb"', args: ['abcabcbb'], expected: 3 },
+      { id: 'tc2', inputDisplay: 's = "bbbbb"', args: ['bbbbb'], expected: 1 },
+      { id: 'tc3', inputDisplay: 's = "pwwkew"', args: ['pwwkew'], expected: 3 },
+    ],
+  },
+  {
+    id: 'q-merge-intervals',
+    number: 3,
+    title: 'Merge Overlapping Intervals',
+    topic: TopicCategory.ArraysHashing,
+    difficulty: Difficulty.Medium,
+    companies: ['Google', 'Atlassian', 'Stripe'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 20,
+    prompt:
+      'Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input.',
+    examples: [
+      {
+        input: 'intervals = [[1,3],[2,6],[8,10],[15,18]]',
+        output: '[[1,6],[8,10],[15,18]]',
+        explanation: 'Intervals [1,3] and [2,6] overlap and merge into [1,6].',
+      },
+      {
+        input: 'intervals = [[1,4],[4,5]]',
+        output: '[[1,5]]',
+      },
+    ],
+    constraints: ['1 <= intervals.length <= 10^4', 'intervals[i].length == 2', '0 <= start_i <= end_i <= 10^4'],
+    hints: [
+      'Sort intervals by start time ascending first.',
+      'Compare the current interval start with the end of the last merged interval.',
+    ],
+    approachSummary:
+      'Sort the intervals by start coordinate. Append the first interval to result, then for each subsequent interval either extend the last merged end or push a new interval.',
+    timeComplexity: 'O(n log n)',
+    spaceComplexity: 'O(n)',
+    functionName: 'mergeIntervals',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function mergeIntervals(intervals) {\n  if (intervals.length === 0) return [];\n  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);\n  const merged = [sorted[0].slice()];\n  for (let i = 1; i < sorted.length; i++) {\n    const last = merged[merged.length - 1];\n    if (sorted[i][0] <= last[1]) {\n      last[1] = Math.max(last[1], sorted[i][1]);\n    } else {\n      merged.push(sorted[i].slice());\n    }\n  }\n  return merged;\n}`,
+      [CodeLanguage.Python]: `def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    intervals.sort(key=lambda x: x[0])\n    merged = [intervals[0][:]]\n    for start, end in intervals[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return merged`,
+      [CodeLanguage.Cpp]: `vector<vector<int>> mergeIntervals(vector<vector<int>>& intervals) {\n    sort(intervals.begin(), intervals.end());\n    vector<vector<int>> res = {intervals[0]};\n    for (int i = 1; i < intervals.size(); ++i) {\n        if (intervals[i][0] <= res.back()[1]) res.back()[1] = max(res.back()[1], intervals[i][1]);\n        else res.push_back(intervals[i]);\n    }\n    return res;\n}`,
+    },
+    referenceSolutionJs: `function mergeIntervals(intervals) {\n  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);\n  const merged = [sorted[0].slice()];\n  for (let i = 1; i < sorted.length; i++) {\n    const last = merged[merged.length - 1];\n    if (sorted[i][0] <= last[1]) last[1] = Math.max(last[1], sorted[i][1]);\n    else merged.push(sorted[i].slice());\n  }\n  return merged;\n}`,
+    testCases: [
+      {
+        id: 'tc1',
+        inputDisplay: '[[1,3],[2,6],[8,10],[15,18]]',
+        args: [[[1, 3], [2, 6], [8, 10], [15, 18]]],
+        expected: [[1, 6], [8, 10], [15, 18]],
+      },
+      {
+        id: 'tc2',
+        inputDisplay: '[[1,4],[4,5]]',
+        args: [[[1, 4], [4, 5]]],
+        expected: [[1, 5]],
+      },
+    ],
+  },
+  {
+    id: 'q-house-robber',
+    number: 4,
+    title: 'Maximum Non-Adjacent Subsequence Sum',
+    topic: TopicCategory.DynamicProgramming,
+    difficulty: Difficulty.Medium,
+    companies: ['Google', 'Amazon', 'Goldman Sachs'],
+    frequencyLabel: 'High Freq',
+    estimatedMinutes: 20,
+    prompt:
+      'Given an integer array nums representing security values along a row of nodes, return the maximum sum you can collect without selecting two adjacent indices.',
+    examples: [
+      { input: 'nums = [1, 2, 3, 1]', output: '4', explanation: 'Pick index 0 (1) and index 2 (3) -> 4.' },
+      { input: 'nums = [2, 7, 9, 3, 1]', output: '12', explanation: 'Pick 2 + 9 + 1 = 12.' },
+    ],
+    constraints: ['1 <= nums.length <= 100', '0 <= nums[i] <= 400'],
+    hints: [
+      'At index i, decide between taking nums[i] + dp[i-2] or skipping and keeping dp[i-1].',
+      'Reduce space complexity to O(1) using two rolling variables.',
+    ],
+    approachSummary:
+      'Use rolling 1D dynamic programming: keep prev2 and prev1 representing optimal sums up to i-2 and i-1. Transition with curr = max(prev1, prev2 + nums[i]).',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(1)',
+    functionName: 'maxNonAdjacentSum',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function maxNonAdjacentSum(nums) {\n  let prev2 = 0;\n  let prev1 = 0;\n  for (const val of nums) {\n    const next = Math.max(prev1, prev2 + val);\n    prev2 = prev1;\n    prev1 = next;\n  }\n  return prev1;\n}`,
+      [CodeLanguage.Python]: `def max_non_adjacent_sum(nums: list[int]) -> int:\n    prev2 = prev1 = 0\n    for val in nums:\n        prev2, prev1 = prev1, max(prev1, prev2 + val)\n    return prev1`,
+      [CodeLanguage.Cpp]: `int maxNonAdjacentSum(vector<int>& nums) {\n    int prev2 = 0, prev1 = 0;\n    for (int v : nums) {\n        int next = max(prev1, prev2 + v);\n        prev2 = prev1;\n        prev1 = next;\n    }\n    return prev1;\n}`,
+    },
+    referenceSolutionJs: `function maxNonAdjacentSum(nums) {\n  let prev2 = 0, prev1 = 0;\n  for (const val of nums) {\n    const next = Math.max(prev1, prev2 + val);\n    prev2 = prev1;\n    prev1 = next;\n  }\n  return prev1;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'nums = [1, 2, 3, 1]', args: [[1, 2, 3, 1]], expected: 4 },
+      { id: 'tc2', inputDisplay: 'nums = [2, 7, 9, 3, 1]', args: [[2, 7, 9, 3, 1]], expected: 12 },
+      { id: 'tc3', inputDisplay: 'nums = [5]', args: [[5]], expected: 5 },
+    ],
+  },
+  {
+    id: 'q-course-schedule',
+    number: 5,
+    title: 'Course Prerequisite Cycle Check',
+    topic: TopicCategory.TreesGraphs,
+    difficulty: Difficulty.Medium,
+    companies: ['Google', 'Microsoft', 'Amazon'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 30,
+    prompt:
+      'There are numCourses courses labeled 0 to numCourses - 1. Given prerequisites[i] = [a, b] meaning you must take course b before course a, return true if you can finish all courses.',
+    examples: [
+      { input: 'numCourses = 2, prerequisites = [[1,0]]', output: 'true' },
+      { input: 'numCourses = 2, prerequisites = [[1,0],[0,1]]', output: 'false' },
+    ],
+    constraints: ['1 <= numCourses <= 2000', '0 <= prerequisites.length <= 5000'],
+    hints: [
+      'Model courses as a directed graph and check whether a cycle exists.',
+      'Kahn’s topological sort with an in-degree queue counts how many nodes can be completed.',
+    ],
+    approachSummary:
+      'Build an adjacency list and in-degree array. Push all nodes with in-degree 0 into a queue, pop nodes while decrementing neighbors, and verify visited count equals numCourses.',
+    timeComplexity: 'O(V + E)',
+    spaceComplexity: 'O(V + E)',
+    functionName: 'canFinish',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function canFinish(numCourses, prerequisites) {\n  const adj = Array.from({ length: numCourses }, () => []);\n  const indeg = new Array(numCourses).fill(0);\n  for (const [course, pre] of prerequisites) {\n    adj[pre].push(course);\n    indeg[course]++;\n  }\n  const queue = [];\n  for (let i = 0; i < numCourses; i++) {\n    if (indeg[i] === 0) queue.push(i);\n  }\n  let visited = 0;\n  while (queue.length > 0) {\n    const node = queue.shift();\n    visited++;\n    for (const next of adj[node]) {\n      indeg[next]--;\n      if (indeg[next] === 0) queue.push(next);\n    }\n  }\n  return visited === numCourses;\n}`,
+      [CodeLanguage.Python]: `from collections import deque\n\ndef can_finish(numCourses: int, prerequisites: list[list[int]]) -> bool:\n    adj = [[] for _ in range(numCourses)]\n    indeg = [0] * numCourses\n    for course, pre in prerequisites:\n        adj[pre].append(course)\n        indeg[course] += 1\n    q = deque([i for i in range(numCourses) if indeg[i] == 0])\n    visited = 0\n    while q:\n        node = q.popleft()\n        visited += 1\n        for nxt in adj[node]:\n            indeg[nxt] -= 1\n            if indeg[nxt] == 0:\n                q.append(nxt)\n    return visited == numCourses`,
+      [CodeLanguage.Cpp]: `bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {\n    vector<vector<int>> adj(numCourses);\n    vector<int> indeg(numCourses, 0);\n    for (auto& p : prerequisites) { adj[p[1]].push_back(p[0]); indeg[p[0]]++; }\n    queue<int> q;\n    for (int i = 0; i < numCourses; ++i) if (indeg[i] == 0) q.push(i);\n    int visited = 0;\n    while (!q.empty()) {\n        int u = q.front(); q.pop(); visited++;\n        for (int v : adj[u]) if (--indeg[v] == 0) q.push(v);\n    }\n    return visited == numCourses;\n}`,
+    },
+    referenceSolutionJs: `function canFinish(numCourses, prerequisites) {\n  const adj = Array.from({ length: numCourses }, () => []);\n  const indeg = new Array(numCourses).fill(0);\n  for (const [c, p] of prerequisites) { adj[p].push(c); indeg[c]++; }\n  const q = [];\n  for (let i = 0; i < numCourses; i++) if (indeg[i] === 0) q.push(i);\n  let visited = 0;\n  while (q.length) {\n    const u = q.shift(); visited++;\n    for (const v of adj[u]) if (--indeg[v] === 0) q.push(v);\n  }\n  return visited === numCourses;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'numCourses = 2, prerequisites = [[1,0]]', args: [2, [[1, 0]]], expected: true },
+      {
+        id: 'tc2',
+        inputDisplay: 'numCourses = 2, prerequisites = [[1,0],[0,1]]',
+        args: [2, [[1, 0], [0, 1]]],
+        expected: false,
+      },
+      {
+        id: 'tc3',
+        inputDisplay: 'numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]',
+        args: [4, [[1, 0], [2, 0], [3, 1], [3, 2]]],
+        expected: true,
+      },
+    ],
+  },
+  {
+    id: 'q-valid-parentheses',
+    number: 6,
+    title: 'Balanced Bracket Validator',
+    topic: TopicCategory.ArraysHashing,
+    difficulty: Difficulty.Easy,
+    companies: ['Stripe', 'Atlassian', 'Amazon'],
+    frequencyLabel: 'High Freq',
+    estimatedMinutes: 15,
+    prompt:
+      'Given a string s containing just the characters "(", ")", "{", "}", "[" and "]", determine if the input string is valid. Open brackets must be closed by the same type of brackets in the correct order.',
+    examples: [
+      { input: 's = "()[]{}"', output: 'true' },
+      { input: 's = "(]"', output: 'false' },
+    ],
+    constraints: ['1 <= s.length <= 10^4', 's consists of parentheses only.'],
+    hints: ['Use a LIFO stack for open brackets.', 'When encountering a closing bracket, check the top of the stack.'],
+    approachSummary:
+      'Push opening brackets onto a stack. For any closing bracket, verify the stack is non-empty and the top matches its corresponding opener.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(n)',
+    functionName: 'isValidBrackets',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function isValidBrackets(s) {\n  const pairs = { ')': '(', ']': '[', '}': '{' };\n  const stack = [];\n  for (const ch of s) {\n    if (ch in pairs) {\n      if (stack.pop() !== pairs[ch]) return false;\n    } else {\n      stack.push(ch);\n    }\n  }\n  return stack.length === 0;\n}`,
+      [CodeLanguage.Python]: `def is_valid_brackets(s: str) -> bool:\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for ch in s:\n        if ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n        else:\n            stack.append(ch)\n    return len(stack) == 0`,
+      [CodeLanguage.Cpp]: `bool isValidBrackets(string s) {\n    stack<char> st;\n    for (char c : s) {\n        if (c == '(' || c == '[' || c == '{') st.push(c);\n        else {\n            if (st.empty()) return false;\n            char t = st.top(); st.pop();\n            if ((c == ')' && t != '(') || (c == ']' && t != '[') || (c == '}' && t != '{')) return false;\n        }\n    }\n    return st.empty();\n}`,
+    },
+    referenceSolutionJs: `function isValidBrackets(s) {\n  const pairs = { ')': '(', ']': '[', '}': '{' };\n  const stack = [];\n  for (const ch of s) {\n    if (ch in pairs) { if (stack.pop() !== pairs[ch]) return false; }\n    else stack.push(ch);\n  }\n  return stack.length === 0;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 's = "()[]{}"', args: ['()[]{}'], expected: true },
+      { id: 'tc2', inputDisplay: 's = "(]"', args: ['(]'], expected: false },
+      { id: 'tc3', inputDisplay: 's = "({[]})"', args: ['({[]})'], expected: true },
+    ],
+  },
+  {
+    id: 'q-container-water',
+    number: 7,
+    title: 'Container With Most Water',
+    topic: TopicCategory.SlidingWindow,
+    difficulty: Difficulty.Medium,
+    companies: ['Google', 'Goldman Sachs', 'Microsoft'],
+    frequencyLabel: 'High Freq',
+    estimatedMinutes: 20,
+    prompt:
+      'Given an integer array height of length n, find two lines that together with the x-axis form a container such that the container contains the most water. Return the maximum amount of water.',
+    examples: [
+      { input: 'height = [1,8,6,2,5,4,8,3,7]', output: '49' },
+      { input: 'height = [1,1]', output: '1' },
+    ],
+    constraints: ['2 <= height.length <= 10^5', '0 <= height[i] <= 10^4'],
+    hints: [
+      'Start pointers at 0 and n - 1.',
+      'Always move the pointer pointing to the shorter line inward.',
+    ],
+    approachSummary:
+      'Initialize left = 0 and right = n - 1. Compute area = min(h[left], h[right]) * (right - left) and move whichever pointer is shorter inward.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(1)',
+    functionName: 'maxArea',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function maxArea(height) {\n  let l = 0, r = height.length - 1, best = 0;\n  while (l < r) {\n    const area = Math.min(height[l], height[r]) * (r - l);\n    if (area > best) best = area;\n    if (height[l] < height[r]) l++;\n    else r--;\n  }\n  return best;\n}`,
+      [CodeLanguage.Python]: `def max_area(height: list[int]) -> int:\n    l, r, best = 0, len(height) - 1, 0\n    while l < r:\n        best = max(best, min(height[l], height[r]) * (r - l))\n        if height[l] < height[r]:\n            l += 1\n        else:\n            r -= 1\n    return best`,
+      [CodeLanguage.Cpp]: `int maxArea(vector<int>& height) {\n    int l = 0, r = height.size() - 1, best = 0;\n    while (l < r) {\n        best = max(best, min(height[l], height[r]) * (r - l));\n        if (height[l] < height[r]) ++l;\n        else --r;\n    }\n    return best;\n}`,
+    },
+    referenceSolutionJs: `function maxArea(height) {\n  let l = 0, r = height.length - 1, best = 0;\n  while (l < r) {\n    best = Math.max(best, Math.min(height[l], height[r]) * (r - l));\n    if (height[l] < height[r]) l++; else r--;\n  }\n  return best;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'height = [1,8,6,2,5,4,8,3,7]', args: [[1, 8, 6, 2, 5, 4, 8, 3, 7]], expected: 49 },
+      { id: 'tc2', inputDisplay: 'height = [1,1]', args: [[1, 1]], expected: 1 },
+    ],
+  },
+  {
+    id: 'q-coin-change',
+    number: 8,
+    title: 'Minimum Coins for Target Amount',
+    topic: TopicCategory.DynamicProgramming,
+    difficulty: Difficulty.Medium,
+    companies: ['Amazon', 'Stripe', 'Atlassian'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 25,
+    prompt:
+      'Given an array of coin denominations coins and an integer amount, return the fewest number of coins needed to make up that amount. Return -1 if the amount cannot be formed.',
+    examples: [
+      { input: 'coins = [1, 2, 5], amount = 11', output: '3', explanation: '11 = 5 + 5 + 1.' },
+      { input: 'coins = [2], amount = 3', output: '-1' },
+    ],
+    constraints: ['1 <= coins.length <= 12', '0 <= amount <= 10^4'],
+    hints: [
+      'Define dp[a] as the minimum coins needed to reach sum a.',
+      'Initialize dp[0] = 0 and all other entries to amount + 1.',
+    ],
+    approachSummary:
+      'Bottom-up 1D DP from 1 to amount: for each sum a and coin c <= a, dp[a] = min(dp[a], dp[a - c] + 1).',
+    timeComplexity: 'O(amount * coins.length)',
+    spaceComplexity: 'O(amount)',
+    functionName: 'coinChange',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function coinChange(coins, amount) {\n  const dp = new Array(amount + 1).fill(amount + 1);\n  dp[0] = 0;\n  for (let a = 1; a <= amount; a++) {\n    for (const c of coins) {\n      if (c <= a) {\n        dp[a] = Math.min(dp[a], dp[a - c] + 1);\n      }\n    }\n  }\n  return dp[amount] > amount ? -1 : dp[amount];\n}`,
+      [CodeLanguage.Python]: `def coin_change(coins: list[int], amount: int) -> int:\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for a in range(1, amount + 1):\n        for c in coins:\n            if c <= a:\n                dp[a] = min(dp[a], dp[a - c] + 1)\n    return -1 if dp[amount] > amount else dp[amount]`,
+      [CodeLanguage.Cpp]: `int coinChange(vector<int>& coins, int amount) {\n    vector<int> dp(amount + 1, amount + 1);\n    dp[0] = 0;\n    for (int a = 1; a <= amount; ++a)\n        for (int c : coins)\n            if (c <= a) dp[a] = min(dp[a], dp[a - c] + 1);\n    return dp[amount] > amount ? -1 : dp[amount];\n}`,
+    },
+    referenceSolutionJs: `function coinChange(coins, amount) {\n  const dp = new Array(amount + 1).fill(amount + 1);\n  dp[0] = 0;\n  for (let a = 1; a <= amount; a++) {\n    for (const c of coins) if (c <= a) dp[a] = Math.min(dp[a], dp[a - c] + 1);\n  }\n  return dp[amount] > amount ? -1 : dp[amount];\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'coins = [1, 2, 5], amount = 11', args: [[1, 2, 5], 11], expected: 3 },
+      { id: 'tc2', inputDisplay: 'coins = [2], amount = 3', args: [[2], 3], expected: -1 },
+      { id: 'tc3', inputDisplay: 'coins = [1], amount = 0', args: [[1], 0], expected: 0 },
+    ],
+  },
+  {
+    id: 'q-word-ladder-length',
+    number: 9,
+    title: 'Word Transformation Shortest Path',
+    topic: TopicCategory.TreesGraphs,
+    difficulty: Difficulty.Hard,
+    companies: ['Amazon', 'Google', 'Microsoft'],
+    frequencyLabel: 'High Freq',
+    estimatedMinutes: 35,
+    prompt:
+      'Given beginWord, endWord, and a dictionary wordList, return the number of words in the shortest transformation sequence from beginWord to endWord where only one letter changes at each step. Return 0 if no sequence exists.',
+    examples: [
+      {
+        input: 'beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log","cog"]',
+        output: '5',
+        explanation: 'hit -> hot -> dot -> dog -> cog (5 words).',
+      },
+      {
+        input: 'beginWord = "hit", endWord = "cog", wordList = ["hot","dot","dog","lot","log"]',
+        output: '0',
+      },
+    ],
+    constraints: ['1 <= beginWord.length <= 10', '1 <= wordList.length <= 5000'],
+    hints: [
+      'Each valid word is a node in an unweighted graph; BFS finds the shortest path.',
+      'Try mutating each character position a–z to discover adjacent dictionary words.',
+    ],
+    approachSummary:
+      'Run Breadth-First Search from beginWord with a Set of unvisited words. At each level, generate all single-character mutations, enqueue matches, and delete them from the Set immediately.',
+    timeComplexity: 'O(N * L * 26)',
+    spaceComplexity: 'O(N * L)',
+    functionName: 'ladderLength',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function ladderLength(beginWord, endWord, wordList) {\n  const dict = new Set(wordList);\n  if (!dict.has(endWord)) return 0;\n  const queue = [[beginWord, 1]];\n  while (queue.length > 0) {\n    const [word, steps] = queue.shift();\n    if (word === endWord) return steps;\n    for (let i = 0; i < word.length; i++) {\n      for (let c = 97; c <= 122; c++) {\n        const next = word.slice(0, i) + String.fromCharCode(c) + word.slice(i + 1);\n        if (dict.has(next)) {\n          dict.delete(next);\n          queue.push([next, steps + 1]);\n        }\n      }\n    }\n  }\n  return 0;\n}`,
+      [CodeLanguage.Python]: `from collections import deque\n\ndef ladder_length(beginWord: str, endWord: str, wordList: list[str]) -> int:\n    word_set = set(wordList)\n    if endWord not in word_set:\n        return 0\n    q = deque([(beginWord, 1)])\n    while q:\n        word, steps = q.popleft()\n        if word == endWord:\n            return steps\n        for i in range(len(word)):\n            for ch in 'abcdefghijklmnopqrstuvwxyz':\n                nxt = word[:i] + ch + word[i+1:]\n                if nxt in word_set:\n                    word_set.remove(nxt)\n                    q.append((nxt, steps + 1))\n    return 0`,
+      [CodeLanguage.Cpp]: `int ladderLength(string beginWord, string endWord, vector<string>& wordList) {\n    unordered_set<string> dict(wordList.begin(), wordList.end());\n    if (!dict.count(endWord)) return 0;\n    queue<pair<string, int>> q;\n    q.push({beginWord, 1});\n    while (!q.empty()) {\n        auto [w, steps] = q.front(); q.pop();\n        if (w == endWord) return steps;\n        for (int i = 0; i < w.size(); ++i) {\n            char orig = w[i];\n            for (char c = 'a'; c <= 'z'; ++c) {\n                w[i] = c;\n                if (dict.count(w)) { dict.erase(w); q.push({w, steps + 1}); }\n            }\n            w[i] = orig;\n        }\n    }\n    return 0;\n}`,
+    },
+    referenceSolutionJs: `function ladderLength(beginWord, endWord, wordList) {\n  const dict = new Set(wordList);\n  if (!dict.has(endWord)) return 0;\n  const q = [[beginWord, 1]];\n  while (q.length) {\n    const [w, s] = q.shift();\n    if (w === endWord) return s;\n    for (let i = 0; i < w.length; i++) {\n      for (let c = 97; c <= 122; c++) {\n        const nxt = w.slice(0, i) + String.fromCharCode(c) + w.slice(i + 1);\n        if (dict.has(nxt)) { dict.delete(nxt); q.push([nxt, s + 1]); }\n      }\n    }\n  }\n  return 0;\n}`,
+    testCases: [
+      {
+        id: 'tc1',
+        inputDisplay: 'hit -> cog (6 words)',
+        args: ['hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log', 'cog']],
+        expected: 5,
+      },
+      {
+        id: 'tc2',
+        inputDisplay: 'hit -> cog (missing cog)',
+        args: ['hit', 'cog', ['hot', 'dot', 'dog', 'lot', 'log']],
+        expected: 0,
+      },
+    ],
+  },
+  {
+    id: 'q-lru-rate-window',
+    number: 10,
+    title: 'Department Top Salaries Query Logic',
+    topic: TopicCategory.SqlDbms,
+    difficulty: Difficulty.Medium,
+    companies: ['Goldman Sachs', 'Microsoft', 'Atlassian'],
+    frequencyLabel: 'Core',
+    estimatedMinutes: 20,
+    prompt:
+      'Given an array of employee records { id, name, department, salary }, return the top salary earners in each department sorted alphabetically by department, keeping ties. (Simulates SQL DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC)).',
+    examples: [
+      {
+        input: 'employees = [{name:"Asha",department:"Eng",salary:95},{name:"Dev",department:"Eng",salary:95},{name:"Mira",department:"Product",salary:88}]',
+        output: '[{department:"Eng",names:["Asha","Dev"],salary:95},{department:"Product",names:["Mira"],salary:88}]',
+      },
+    ],
+    constraints: ['1 <= employees.length <= 10^4', 'Preserve alphabetical order for names within a tied group.'],
+    hints: [
+      'Group records by department and track the maximum salary per department.',
+      'Sort department keys alphabetically and tied employee names alphabetically.',
+    ],
+    approachSummary:
+      'In SQL, use DENSE_RANK() OVER (PARTITION BY departmentId ORDER BY salary DESC) <= 1. Programmatically, aggregate max salary per department in a single pass then sort.',
+    timeComplexity: 'O(n log n)',
+    spaceComplexity: 'O(n)',
+    functionName: 'topEarnersByDepartment',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function topEarnersByDepartment(employees) {\n  const map = new Map();\n  for (const emp of employees) {\n    const cur = map.get(emp.department);\n    if (!cur || emp.salary > cur.salary) {\n      map.set(emp.department, { salary: emp.salary, names: [emp.name] });\n    } else if (emp.salary === cur.salary) {\n      cur.names.push(emp.name);\n    }\n  }\n  return [...map.entries()]\n    .sort((a, b) => a[0].localeCompare(b[0]))\n    .map(([department, info]) => ({\n      department,\n      names: info.names.sort(),\n      salary: info.salary,\n    }));\n}`,
+      [CodeLanguage.Python]: `def top_earners_by_department(employees: list[dict]) -> list[dict]:\n    groups = {}\n    for emp in employees:\n        dept, sal, name = emp['department'], emp['salary'], emp['name']\n        if dept not in groups or sal > groups[dept]['salary']:\n            groups[dept] = {'salary': sal, 'names': [name]}\n        elif sal == groups[dept]['salary']:\n            groups[dept]['names'].append(name)\n    return [{'department': d, 'names': sorted(groups[d]['names']), 'salary': groups[d]['salary']} for d in sorted(groups)]`,
+      [CodeLanguage.Cpp]: `// Equivalent SQL Query:\n// SELECT department, name, salary FROM (\n//   SELECT *, DENSE_RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS rnk\n//   FROM Employees\n// ) t WHERE rnk = 1 ORDER BY department, name;`,
+    },
+    referenceSolutionJs: `function topEarnersByDepartment(employees) {\n  const map = new Map();\n  for (const emp of employees) {\n    const cur = map.get(emp.department);\n    if (!cur || emp.salary > cur.salary) map.set(emp.department, { salary: emp.salary, names: [emp.name] });\n    else if (emp.salary === cur.salary) cur.names.push(emp.name);\n  }\n  return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([department, info]) => ({ department, names: info.names.sort(), salary: info.salary }));\n}`,
+    testCases: [
+      {
+        id: 'tc1',
+        inputDisplay: '3 employees across Eng & Product',
+        args: [
+          [
+            { id: 1, name: 'Dev', department: 'Eng', salary: 95 },
+            { id: 2, name: 'Asha', department: 'Eng', salary: 95 },
+            { id: 3, name: 'Mira', department: 'Product', salary: 88 },
+          ],
+        ],
+        expected: [
+          { department: 'Eng', names: ['Asha', 'Dev'], salary: 95 },
+          { department: 'Product', names: ['Mira'], salary: 88 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'q-task-scheduler',
+    number: 11,
+    title: 'CPU Task Cooldown Scheduler',
+    topic: TopicCategory.OsConcurrency,
+    difficulty: Difficulty.Medium,
+    companies: ['Microsoft', 'Amazon', 'Google'],
+    frequencyLabel: 'High Freq',
+    estimatedMinutes: 25,
+    prompt:
+      'Given a characters array tasks representing CPU tasks (A–Z) and a non-negative cooldown interval n between two identical tasks, return the least number of CPU intervals required to finish all tasks.',
+    examples: [
+      { input: 'tasks = ["A","A","A","B","B","B"], n = 2', output: '8', explanation: 'A -> B -> idle -> A -> B -> idle -> A -> B.' },
+      { input: 'tasks = ["A","A","A","B","B","B"], n = 0', output: '6' },
+    ],
+    constraints: ['1 <= tasks.length <= 10^4', '0 <= n <= 100'],
+    hints: [
+      'The most frequent task dictates the number of frames needed.',
+      'Formula: max(tasks.length, (maxFreq - 1) * (n + 1) + countOfMaxFreqTasks).',
+    ],
+    approachSummary:
+      'Count task frequencies. Let maxFreq be the highest count and maxCount be how many tasks share maxFreq. The minimum intervals equal max(tasks.length, (maxFreq - 1) * (n + 1) + maxCount).',
+    timeComplexity: 'O(N)',
+    spaceComplexity: 'O(1)',
+    functionName: 'leastInterval',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function leastInterval(tasks, n) {\n  const freq = new Array(26).fill(0);\n  for (const t of tasks) freq[t.charCodeAt(0) - 65]++;\n  const maxFreq = Math.max(...freq);\n  const maxCount = freq.filter((f) => f === maxFreq).length;\n  return Math.max(tasks.length, (maxFreq - 1) * (n + 1) + maxCount);\n}`,
+      [CodeLanguage.Python]: `from collections import Counter\n\ndef least_interval(tasks: list[str], n: int) -> int:\n    counts = Counter(tasks).values()\n    max_freq = max(counts)\n    max_count = sum(1 for c in counts if c == max_freq)\n    return max(len(tasks), (max_freq - 1) * (n + 1) + max_count)`,
+      [CodeLanguage.Cpp]: `int leastInterval(vector<char>& tasks, int n) {\n    int freq[26] = {0};\n    for (char c : tasks) freq[c - 'A']++;\n    int maxF = *max_element(freq, freq + 26);\n    int maxC = count(freq, freq + 26, maxF);\n    return max((int)tasks.size(), (maxF - 1) * (n + 1) + maxC);\n}`,
+    },
+    referenceSolutionJs: `function leastInterval(tasks, n) {\n  const freq = new Array(26).fill(0);\n  for (const t of tasks) freq[t.charCodeAt(0) - 65]++;\n  const maxFreq = Math.max(...freq);\n  const maxCount = freq.filter((f) => f === maxFreq).length;\n  return Math.max(tasks.length, (maxFreq - 1) * (n + 1) + maxCount);\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: 'tasks = ["A","A","A","B","B","B"], n = 2', args: [['A', 'A', 'A', 'B', 'B', 'B'], 2], expected: 8 },
+      { id: 'tc2', inputDisplay: 'tasks = ["A","A","A","B","B","B"], n = 0', args: [['A', 'A', 'A', 'B', 'B', 'B'], 0], expected: 6 },
+    ],
+  },
+  {
+    id: 'q-trapping-rain',
+    number: 12,
+    title: 'Trapping Rain Water Elevation',
+    topic: TopicCategory.SlidingWindow,
+    difficulty: Difficulty.Hard,
+    companies: ['Google', 'Goldman Sachs', 'Amazon'],
+    frequencyLabel: 'Very High',
+    estimatedMinutes: 30,
+    prompt:
+      'Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.',
+    examples: [
+      { input: 'height = [0,1,0,2,1,0,1,3,2,1,2,1]', output: '6' },
+      { input: 'height = [4,2,0,3,2,5]', output: '9' },
+    ],
+    constraints: ['1 <= height.length <= 2 * 10^4', '0 <= height[i] <= 10^5'],
+    hints: [
+      'Water above bar i equals min(maxLeft, maxRight) - height[i].',
+      'Two pointers tracking leftMax and rightMax solve this in O(1) space.',
+    ],
+    approachSummary:
+      'Use two pointers l and r starting at both ends alongside leftMax and rightMax. Advance the side with the smaller boundary height and accumulate trapped water.',
+    timeComplexity: 'O(n)',
+    spaceComplexity: 'O(1)',
+    functionName: 'trapWater',
+    starterCode: {
+      [CodeLanguage.JavaScript]: `function trapWater(height) {\n  let l = 0, r = height.length - 1;\n  let leftMax = 0, rightMax = 0, water = 0;\n  while (l < r) {\n    if (height[l] < height[r]) {\n      leftMax = Math.max(leftMax, height[l]);\n      water += leftMax - height[l];\n      l++;\n    } else {\n      rightMax = Math.max(rightMax, height[r]);\n      water += rightMax - height[r];\n      r--;\n    }\n  }\n  return water;\n}`,
+      [CodeLanguage.Python]: `def trap_water(height: list[int]) -> int:\n    l, r = 0, len(height) - 1\n    l_max = r_max = water = 0\n    while l < r:\n        if height[l] < height[r]:\n            l_max = max(l_max, height[l])\n            water += l_max - height[l]\n            l += 1\n        else:\n            r_max = max(r_max, height[r])\n            water += r_max - height[r]\n            r -= 1\n    return water`,
+      [CodeLanguage.Cpp]: `int trapWater(vector<int>& height) {\n    int l = 0, r = height.size() - 1, lMax = 0, rMax = 0, water = 0;\n    while (l < r) {\n        if (height[l] < height[r]) { lMax = max(lMax, height[l]); water += lMax - height[l++]; }\n        else { rMax = max(rMax, height[r]); water += rMax - height[r--]; }\n    }\n    return water;\n}`,
+    },
+    referenceSolutionJs: `function trapWater(height) {\n  let l = 0, r = height.length - 1, lMax = 0, rMax = 0, w = 0;\n  while (l < r) {\n    if (height[l] < height[r]) { lMax = Math.max(lMax, height[l]); w += lMax - height[l++]; }\n    else { rMax = Math.max(rMax, height[r]); w += rMax - height[r--]; }\n  }\n  return w;\n}`,
+    testCases: [
+      { id: 'tc1', inputDisplay: '[0,1,0,2,1,0,1,3,2,1,2,1]', args: [[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]], expected: 6 },
+      { id: 'tc2', inputDisplay: '[4,2,0,3,2,5]', args: [[4, 2, 0, 3, 2, 5]], expected: 9 },
+    ],
+  },
+];
+
+export const ASSESSMENTS: Assessment[] = [
+  {
+    id: 'assess-amazon-oa',
+    title: 'Amazon SDE-1 Online Assessment Drill',
+    company: 'Amazon',
+    category: 'DSA & Complexity',
+    durationMinutes: 20,
+    difficulty: Difficulty.Medium,
+    description:
+      'Timed screening simulation covering hash-based lookups, sliding windows, graph traversals, and asymptotic trade-offs.',
+    questions: [
+      {
+        id: 'aq-1',
+        topic: 'Complexity Analysis',
+        prompt: 'What is the worst-case time complexity of inserting n elements into a balanced Red-Black Tree and then performing an in-order traversal?',
+        options: ['O(n)', 'O(n log n)', 'O(n^2)', 'O(log n)'],
+        correctIndex: 1,
+        explanation: 'Each of the n insertions takes O(log n) worst-case time, yielding O(n log n). In-order traversal takes O(n), so overall complexity is O(n log n).',
+      },
+      {
+        id: 'aq-2',
+        topic: 'Graphs',
+        prompt: 'Which algorithm finds shortest paths in a directed graph that contains negative edge weights (without negative cycles) in O(V * E)?',
+        options: ['Dijkstra with Binary Heap', 'Breadth-First Search', 'Bellman-Ford Algorithm', 'Prim’s Algorithm'],
+        correctIndex: 2,
+        explanation: 'Dijkstra fails when negative edge weights exist. Bellman-Ford relaxes all E edges V - 1 times and correctly handles negative weights.',
+      },
+      {
+        id: 'aq-3',
+        topic: 'Code Output',
+        prompt: 'What does the following sliding window snippet return for arr = [4, 2, 1, 7, 8, 1, 2, 8, 1, 0] and k = 3?',
+        codeSnippet: `let maxSum = 0, curr = 0;\nfor (let i = 0; i < arr.length; i++) {\n  curr += arr[i];\n  if (i >= k - 1) {\n    maxSum = Math.max(maxSum, curr);\n    curr -= arr[i - (k - 1)];\n  }\n}\nreturn maxSum;`,
+        options: ['14', '16', '17', '15'],
+        correctIndex: 1,
+        explanation: 'The contiguous subarray [1, 7, 8] has sum 16, which is the largest window of size 3.',
+      },
+      {
+        id: 'aq-4',
+        topic: 'Data Structures',
+        prompt: 'To design an LRU Cache supporting O(1) average get and put operations, which pair of data structures is standard?',
+        options: [
+          'Hash Map + Min Heap',
+          'Hash Map + Doubly Linked List',
+          'Trie + Stack',
+          'Balanced BST + Queue',
+        ],
+        correctIndex: 1,
+        explanation: 'A Hash Map gives O(1) key-to-node lookup while a Doubly Linked List allows O(1) node promotion and tail eviction.',
+      },
+      {
+        id: 'aq-5',
+        topic: 'Dynamic Programming',
+        prompt: 'In the 0/1 Knapsack problem with N items and capacity W, why does the 1D space-optimized loop iterate capacity w from W down to weight[i]?',
+        options: [
+          'To ensure each item is considered at most once per state transition',
+          'To allow unbounded reuse of the same item',
+          'To sort items by value-to-weight ratio',
+          'To avoid integer overflow in dp[0]',
+        ],
+        correctIndex: 0,
+        explanation: 'Iterating backwards prevents overwriting dp[w - weight[i]] from the previous row before it is read for larger capacities.',
+      },
+    ],
+  },
+  {
+    id: 'assess-core-cs',
+    title: 'Microsoft Core CS: OS, DBMS & Networks',
+    company: 'Microsoft',
+    category: 'Core CS Fundamentals',
+    durationMinutes: 15,
+    difficulty: Difficulty.Medium,
+    description:
+      'High-yield conceptual assessment covering virtual memory, deadlock conditions, ACID isolation levels, and TCP congestion control.',
+    questions: [
+      {
+        id: 'cs-1',
+        topic: 'Operating Systems',
+        prompt: 'Which of the following is NOT one of the four Coffman conditions required for a deadlock to occur?',
+        options: ['Mutual Exclusion', 'Hold and Wait', 'Preemptive Scheduling', 'Circular Wait'],
+        correctIndex: 2,
+        explanation: 'Deadlock requires Mutual Exclusion, Hold and Wait, No Preemption, and Circular Wait. Preemptive scheduling prevents No Preemption.',
+      },
+      {
+        id: 'cs-2',
+        topic: 'DBMS & Indexing',
+        prompt: 'Why do relational databases like PostgreSQL and InnoDB prefer B+ Trees over standard Binary Search Trees for disk-backed indexes?',
+        options: [
+          'B+ Trees eliminate the need for primary keys',
+          'High branching factor minimizes disk I/O height and leaf links speed up range scans',
+          'B+ Trees store hash buckets in L1 cache only',
+          'Binary Search Trees cannot store integer keys',
+        ],
+        correctIndex: 1,
+        explanation: 'B+ Trees pack many keys per disk page (high fan-out), keeping tree depth very shallow (3–4 levels for millions of rows) and linking leaves sequentially.',
+      },
+      {
+        id: 'cs-3',
+        topic: 'Computer Networks',
+        prompt: 'In TCP, what happens during Fast Retransmit before the retransmission timer expires?',
+        options: [
+          'The sender doubles the congestion window immediately',
+          'Receiving 3 duplicate ACKs triggers immediate retransmission of the missing segment',
+          'The connection resets with an RST packet',
+          'UDP fallback is activated automatically',
+        ],
+        correctIndex: 1,
+        explanation: 'Three duplicate ACKs signal a likely lost packet while subsequent packets are arriving, prompting TCP to retransmit without waiting for RTO.',
+      },
+      {
+        id: 'cs-4',
+        topic: 'SQL Isolation',
+        prompt: 'Which SQL isolation anomaly occurs when a transaction re-executes a range query and sees new rows inserted by another committed transaction?',
+        options: ['Dirty Read', 'Lost Update', 'Phantom Read', 'Deadlock'],
+        correctIndex: 2,
+        explanation: 'A Phantom Read happens when a concurrent committed transaction inserts or deletes rows matching a WHERE predicate between two reads.',
+      },
+    ],
+  },
+  {
+    id: 'assess-goldman-quant',
+    title: 'Goldman Sachs Engineering & Quant Screening',
+    company: 'Goldman Sachs',
+    category: 'Aptitude & Algorithms',
+    durationMinutes: 15,
+    difficulty: Difficulty.Hard,
+    description:
+      'Quantitative reasoning, probability, recurrence relations, and financial systems edge cases.',
+    questions: [
+      {
+        id: 'gs-1',
+        topic: 'Probability',
+        prompt: 'Two fair 6-sided dice are rolled. What is the probability that the sum is at least 10?',
+        options: ['1/6', '1/9', '5/36', '1/4'],
+        correctIndex: 0,
+        explanation: 'Sums >= 10 are (4,6),(5,5),(6,4),(5,6),(6,5),(6,6) -> 6 out of 36 outcomes = 1/6.',
+      },
+      {
+        id: 'gs-2',
+        topic: 'Recurrences',
+        prompt: 'Using the Master Theorem, what is the tight bound for T(n) = 4T(n/2) + n^2?',
+        options: ['O(n^2)', 'O(n^2 log n)', 'O(n log n)', 'O(n^3)'],
+        correctIndex: 1,
+        explanation: 'Here a = 4, b = 2, so n^(log_2 4) = n^2. Since f(n) = Theta(n^2), Case 2 gives Theta(n^2 log n).',
+      },
+      {
+        id: 'gs-3',
+        topic: 'Bit Manipulation',
+        prompt: 'For a positive integer n, what does the expression (n & (n - 1)) === 0 verify?',
+        options: [
+          'n is divisible by 4',
+          'n is a prime number',
+          'n is a power of 2',
+          'n has an odd number of set bits',
+        ],
+        correctIndex: 2,
+        explanation: 'Subtracting 1 flips the lowest set bit and all trailing zeros, so n & (n - 1) clears the lowest set bit. It equals 0 iff n has exactly one set bit.',
+      },
+      {
+        id: 'gs-4',
+        topic: 'Concurrency',
+        prompt: 'What is the primary risk when two threads read and modify a shared non-atomic integer counter without synchronization?',
+        options: ['Stack Overflow', 'Race Condition / Lost Updates', 'Memory Leak', 'Page Thrashing'],
+        correctIndex: 1,
+        explanation: 'Read-modify-write is three CPU operations; interleaved execution causes lost increments due to a race condition.',
+      },
+    ],
+  },
+  {
+    id: 'assess-stripe-backend',
+    title: 'Stripe API & System Reliability Check',
+    company: 'Stripe',
+    category: 'Backend & Distributed Systems',
+    durationMinutes: 15,
+    difficulty: Difficulty.Medium,
+    description:
+      'Practical backend engineering scenarios covering idempotency keys, rate limiting, retries, and database transactions.',
+    questions: [
+      {
+        id: 'st-1',
+        topic: 'API Design',
+        prompt: 'Why do payment APIs require an Idempotency-Key header on POST /charges requests?',
+        options: [
+          'To encrypt the JSON payload without TLS',
+          'To safely retry network-failed requests without charging a customer twice',
+          'To bypass authentication checks',
+          'To compress response headers',
+        ],
+        correctIndex: 1,
+        explanation: 'Idempotency keys let the server deduplicate retried requests and return the original stored response instead of creating duplicate charges.',
+      },
+      {
+        id: 'st-2',
+        topic: 'Rate Limiting',
+        prompt: 'Which rate-limiting algorithm allows short traffic bursts up to a bucket capacity while enforcing a steady average refill rate?',
+        options: ['Fixed Window Counter', 'Token Bucket', 'Round Robin', 'Consistent Hashing'],
+        correctIndex: 1,
+        explanation: 'Token Bucket accumulates tokens at a fixed rate up to bucket capacity, permitting controlled bursts while capping sustained throughput.',
+      },
+      {
+        id: 'st-3',
+        topic: 'Resilience',
+        prompt: 'When implementing retries with exponential backoff against a degraded downstream service, why should you add jitter?',
+        options: [
+          'To reduce JSON serialization size',
+          'To prevent synchronized retry storms (thundering herd) across clients',
+          'To force TCP slow start',
+          'To guarantee FIFO ordering',
+        ],
+        correctIndex: 1,
+        explanation: 'Random jitter spreads retry timestamps out so thousands of clients do not hammer the recovering server at identical intervals.',
+      },
+      {
+        id: 'st-4',
+        topic: 'HTTP Semantics',
+        prompt: 'Which HTTP status code is most appropriate when a client exceeds an API rate limit?',
+        options: ['401 Unauthorized', '409 Conflict', '429 Too Many Requests', '502 Bad Gateway'],
+        correctIndex: 2,
+        explanation: '429 Too Many Requests signals rate limiting, ideally paired with a Retry-After header.',
+      },
+    ],
+  },
+];
+
+export const INITIAL_INTERVIEW_DRIVES: InterviewDrive[] = [
+  {
+    id: 'drive-google',
+    company: 'Google',
+    role: 'Software Engineer, University Grad',
+    ctcRange: '₹32L – ₹38L',
+    driveDate: 'Dec 04, 2026',
+    stage: InterviewStage.TechnicalRound,
+    nextRoundTitle: 'Technical Round 2 (Graphs & DP)',
+    locationOrMode: 'Virtual · Google Meet',
+    focusTopics: ['Graph Shortest Path', 'Dynamic Programming', 'Complexity Proofs', 'Googleyness'],
+    roundStructure: [
+      'Round 1: 45-min Coding (Arrays / Trees)',
+      'Round 2: 45-min Coding (Graphs / DP)',
+      'Round 3: 45-min System Design & Behavioral',
+    ],
+    checklist: [
+      { id: 'g-1', label: 'Complete 5 medium-hard Graph BFS/DFS problems', done: true },
+      { id: 'g-2', label: 'Review time & space complexity explanation templates', done: true },
+      { id: 'g-3', label: 'Prepare 3 STAR stories on ambiguity & ownership', done: false },
+      { id: 'g-4', label: 'Practice dry-running test cases without an IDE', done: false },
+    ],
+  },
+  {
+    id: 'drive-amazon',
+    company: 'Amazon',
+    role: 'SDE-1 (Campus Drive)',
+    ctcRange: '₹26L – ₹30L',
+    driveDate: 'Dec 08, 2026',
+    stage: InterviewStage.OaScheduled,
+    nextRoundTitle: 'Online Coding Assessment (90 mins)',
+    locationOrMode: 'HackerRank Proctored',
+    focusTopics: ['Sliding Window', 'Greedy Scheduling', 'Leadership Principles', 'OOP Design'],
+    roundStructure: [
+      'OA: 2 Coding Problems + Work Style Simulation',
+      'Technical 1: DSA + Leadership Principles',
+      'Bar Raiser: Low-Level Design + Deep Dive',
+    ],
+    checklist: [
+      { id: 'a-1', label: 'Take Amazon SDE-1 Online Assessment Drill', done: false },
+      { id: 'a-2', label: 'Map 2 project examples to Customer Obsession & Ownership', done: true },
+      { id: 'a-3', label: 'Revise Priority Queue & Interval Merging patterns', done: false },
+    ],
+  },
+  {
+    id: 'drive-microsoft',
+    company: 'Microsoft',
+    role: 'Software Engineer (IDC)',
+    ctcRange: '₹28L – ₹34L',
+    driveDate: 'Dec 12, 2026',
+    stage: InterviewStage.Applied,
+    nextRoundTitle: 'Resume Shortlist & Core CS Test',
+    locationOrMode: 'On-Campus · Placement Cell',
+    focusTopics: ['Trees & Linked Lists', 'OS Concurrency', 'DBMS Indexing', 'Clean Modular Code'],
+    roundStructure: [
+      'Screening: 60-min Codility Test',
+      'Round 1: Data Structures + OS/DBMS',
+      'Round 2: Hiring Manager & Architecture',
+    ],
+    checklist: [
+      { id: 'm-1', label: 'Finish Microsoft Core CS: OS, DBMS & Networks quiz', done: true },
+      { id: 'm-2', label: 'Review resume bullet metrics & system bottlenecks', done: false },
+    ],
+  },
+  {
+    id: 'drive-stripe',
+    company: 'Stripe',
+    role: 'New Grad Backend Engineer',
+    ctcRange: '₹35L – ₹42L',
+    driveDate: 'Dec 16, 2026',
+    stage: InterviewStage.HrRound,
+    nextRoundTitle: 'Integration & Debugging Round',
+    locationOrMode: 'Virtual · Pair Programming',
+    focusTopics: ['API Integration', 'Idempotency', 'String Parsing', 'Debugging Legacy Code'],
+    roundStructure: [
+      'Phone Screen: Practical String / Data Parsing',
+      'Integration Round: Live HTTP & SDK Debugging',
+      'Architecture & Hiring Manager Chat',
+    ],
+    checklist: [
+      { id: 's-1', label: 'Practice clean HTTP client error handling & retries', done: true },
+      { id: 's-2', label: 'Complete Stripe API & System Reliability Check', done: true },
+      { id: 's-3', label: 'Prepare thoughtful questions about developer tooling', done: false },
+    ],
+  },
+];
+
+export const MOCK_INTERVIEW_PROMPTS: MockInterviewPrompt[] = [
+  {
+    id: 'mock-1',
+    type: 'Behavioral (STAR)',
+    title: 'Handling Conflicting Technical Priorities Under a Tight Deadline',
+    companyTag: 'Google · Amazon',
+    prompt:
+      'Tell me about a time you had to make a difficult engineering trade-off to ship a project or capstone deliverable on time. What did you sacrifice, and how did you validate quality?',
+    recommendedMinutes: 4,
+    rubricItems: [
+      'Set concise Situation & Task context in under 45 seconds',
+      'Explained the specific Action YOU took (avoided vague "we")',
+      'Quantified the Result or lesson learned with concrete metrics',
+      'Highlighted trade-offs and stakeholder communication',
+    ],
+    keyTalkingPoints: [
+      'Frame the constraint clearly (e.g., 48-hour hackathon or release freeze).',
+      'Compare two concrete technical options (e.g., polling vs WebSockets).',
+      'Show measurable impact: latency, test pass rate, or user adoption.',
+    ],
+  },
+  {
+    id: 'mock-2',
+    type: 'System Design',
+    title: 'Design a Rate-Limited URL Shortener & Analytics Service',
+    companyTag: 'Stripe · Atlassian',
+    prompt:
+      'Design a service that converts long URLs into 7-character short links, handles 10,000 redirects/sec, and tracks click analytics without slowing down redirects.',
+    recommendedMinutes: 12,
+    rubricItems: [
+      'Estimated read/write QPS and storage footprint cleanly',
+      'Defined Base62 encoding or counter-based unique ID generation',
+      'Placed Redis read-through cache in front of persistent DB',
+      'Decoupled analytics ingestion asynchronously via message queue',
+    ],
+    keyTalkingPoints: [
+      'Read-heavy ratio (~100:1) justifies aggressive caching at edge/Redis.',
+      'Use HTTP 302 vs 301 intentionally depending on analytics tracking needs.',
+      'Prevent hot-key saturation and handle collision/rate-limiting per API key.',
+    ],
+  },
+  {
+    id: 'mock-3',
+    type: 'Behavioral (STAR)',
+    title: 'Debugging a Production or Team-Blocking Failure',
+    companyTag: 'Microsoft · Stripe',
+    prompt:
+      'Describe the hardest bug you encountered during an internship or major project. How did you isolate the root cause, fix it, and prevent recurrence?',
+    recommendedMinutes: 4,
+    rubricItems: [
+      'Described systematic hypothesis-driven debugging steps',
+      'Avoided blaming teammates; demonstrated ownership',
+      'Added automated tests, monitoring, or guardrails afterward',
+    ],
+    keyTalkingPoints: [
+      'Explain how you narrowed the blast radius using logs or binary search.',
+      'Mention the exact root cause (race condition, N+1 query, stale cache).',
+      'Close with the regression test or CI check you introduced.',
+    ],
+  },
+  {
+    id: 'mock-4',
+    type: 'System Design',
+    title: 'Design a Real-Time Campus Coding Contest Leaderboard',
+    companyTag: 'Amazon · Google',
+    prompt:
+      'Design a live leaderboard supporting 50,000 concurrent students submitting solutions during a 2-hour campus assessment, with instant rank lookups and top-100 updates.',
+    recommendedMinutes: 12,
+    rubricItems: [
+      'Used Redis Sorted Sets (ZSET) for O(log N) score updates & rank queries',
+      'Designed composite tie-breaker score (points + submission timestamp)',
+      'Bounded client updates via periodic polling or SSE fan-out',
+      'Separated submission evaluation workers from leaderboard storage',
+    ],
+    keyTalkingPoints: [
+      'Encode tie-breaker directly in float/64-bit score or secondary lookup.',
+      'Isolate untrusted code execution in sandboxed worker containers.',
+      'Cache serialized Top-100 JSON payload for 1–2s to shield Redis reads.',
+    ],
+  },
+];
+
+export const WEEKLY_ACTIVITY: WeeklyActivityPoint[] = [
+  { day: 'Mon', problemsSolved: 3, assessmentsCompleted: 1 },
+  { day: 'Tue', problemsSolved: 5, assessmentsCompleted: 0 },
+  { day: 'Wed', problemsSolved: 2, assessmentsCompleted: 1 },
+  { day: 'Thu', problemsSolved: 6, assessmentsCompleted: 1 },
+  { day: 'Fri', problemsSolved: 4, assessmentsCompleted: 0 },
+  { day: 'Sat', problemsSolved: 7, assessmentsCompleted: 2 },
+  { day: 'Sun', problemsSolved: 4, assessmentsCompleted: 1 },
+];
